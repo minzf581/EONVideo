@@ -10,13 +10,17 @@ export function TopicReviewPage() {
   const [topics, setTopics] = useState<Topic[]>([]);
   const [selected, setSelected] = useState<Topic | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   async function load() {
     setLoading(true);
+    setError(null);
     try {
       const data = await api.topics();
       setTopics(data);
       setSelected(data[0] ?? null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "无法连接后端 API，请检查 VITE_API_BASE 或 CORS 配置。");
     } finally {
       setLoading(false);
     }
@@ -24,10 +28,13 @@ export function TopicReviewPage() {
 
   async function generateDailyTopics() {
     setLoading(true);
+    setError(null);
     try {
       const data = await api.generateDailyTopics();
       setTopics(data);
       setSelected(data[0] ?? null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "生成选题失败，请稍后重试。");
     } finally {
       setLoading(false);
     }
@@ -83,6 +90,12 @@ export function TopicReviewPage() {
         <MetricCard label="已通过" value={stats.approved} tone="green" />
         <MetricCard label="高风险关注" value={stats.risk} tone="amber" />
       </section>
+
+      {error && (
+        <div className="mx-6 mb-5 rounded-md border border-red-200 bg-red-50 p-4 text-sm leading-6 text-red-800">
+          {error}
+        </div>
+      )}
 
       <main className="grid grid-cols-[minmax(420px,0.95fr)_1.05fr] gap-4 px-6 pb-8">
         <section className="space-y-3">

@@ -8,6 +8,7 @@ from typing import Optional
 
 from app.schemas.topics import GenerateDailyTopicsRequest, ReviewRequest, Topic, TopicStatus, TopicUpdateRequest
 from app.services import mock_store
+from app.services.news_ingestion import generate_live_topics
 
 router = APIRouter(prefix="/topics", tags=["topics"])
 
@@ -18,7 +19,15 @@ def list_topics(status: Optional[TopicStatus] = Query(default=None)) -> list[Top
 
 
 @router.post("/generate-daily", response_model=list[Topic])
-def generate_daily_topics(payload: GenerateDailyTopicsRequest) -> list[Topic]:
+async def generate_daily_topics(payload: GenerateDailyTopicsRequest) -> list[Topic]:
+    try:
+        live_topics = await generate_live_topics(payload.count)
+        if live_topics:
+            mock_store.replace_topics(live_topics)
+            return live_topics
+    except Exception:
+        # Keep the production page usable if an upstream RSS source is temporarily unavailable.
+        return mock_store.ensure_daily_topics(payload.count)
     return mock_store.ensure_daily_topics(payload.count)
 
 

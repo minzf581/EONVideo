@@ -10,6 +10,7 @@
 - 发布效果反馈模块
 - 支持平台：微信视频号、抖音、小红书
 - Remotion 竖屏财经短视频模板占位
+- 真实 RSS 热点采集：Google News RSS、MAS RSS、HKEX RSS 等公开源
 
 ## 目录
 
@@ -80,6 +81,24 @@ VITE_API_BASE=https://你的后端服务域名/api/v1
 ```
 
 如果你只有一个 Railway 服务且 Root Directory 是 `apps/api`，打开域名看到的是 API 状态页，不会是 React 审核后台。
+
+## 真实热点采集
+
+点击“生成今日 10 个选题”时，后端会优先从公开 RSS 源抓取最新新闻，再按业务相关度生成审核选题。
+
+当前内置方向：
+
+- AI / 科技融资
+- 新加坡资本市场
+- 香港 IPO
+- RWA / 资产代币化
+- 新加坡家族办公室
+- 中国企业出海
+- 海外融资与全球化资本结构
+
+如果公开 RSS 源暂时不可用，系统会回退到本地种子选题，避免线上页面空白。
+
+后续接入 OpenAI 后，可以把 `apps/api/app/services/news_ingestion.py` 里的规则生成替换为模型生成。
 
 ```bash
 cd apps/web

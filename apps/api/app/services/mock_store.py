@@ -241,6 +241,11 @@ def ensure_daily_topics(count: int = 10) -> list[Topic]:
     return TOPICS[:count]
 
 
+def replace_topics(topics: list[Topic]) -> None:
+    TOPICS.clear()
+    TOPICS.extend(topics)
+
+
 def list_topics(status: Optional[TopicStatus] = None) -> list[Topic]:
     ensure_daily_topics()
     if status:
