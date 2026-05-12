@@ -19,6 +19,13 @@ export interface TopicScript {
   estimated_duration_seconds: number;
 }
 
+export interface VideoAsset {
+  asset_type: "mp4" | "srt" | "cover" | "publish_copy" | "remotion_json";
+  file_name: string;
+  download_url: string;
+  render_status: "pending" | "completed" | "failed";
+}
+
 export interface Topic {
   id: string;
   production_date: string;
@@ -37,6 +44,7 @@ export interface Topic {
   tags: string[];
   scripts: TopicScript[];
   created_at: string;
+  assets: VideoAsset[];
 }
 
 export interface PublicationChannel {
@@ -94,4 +102,3 @@ export interface PerformanceAnalysis {
   prompt_learning_summary: string;
   created_at: string;
 }
-

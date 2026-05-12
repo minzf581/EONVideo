@@ -37,7 +37,13 @@ export const api = {
   approveTopic: (id: string) => request<Topic>(`/topics/${id}/approve`, { method: "POST", body: "{}" }),
   rejectTopic: (id: string) => request<Topic>(`/topics/${id}/reject`, { method: "POST", body: "{}" }),
   requestRevision: (id: string) => request<Topic>(`/topics/${id}/request-revision`, { method: "POST", body: "{}" }),
-  generateDraft: (id: string) => request<{ message: string }>(`/topics/${id}/video-draft`, { method: "POST" }),
+  updateScript: (id: string, payload: { script_type: "30s" | "60s"; full_script: string }) =>
+    request<Topic>(`/topics/${id}/scripts`, { method: "PATCH", body: JSON.stringify(payload) }),
+  generateDraft: (id: string, scriptType: "30s" | "60s" = "60s") =>
+    request<{ topic: Topic; assets: Topic["assets"]; message: string }>(`/topics/${id}/video-draft`, {
+      method: "POST",
+      body: JSON.stringify({ script_type: scriptType, template: "finance_advisory_dark" }),
+    }),
   renderFinal: (id: string) => request<{ message: string }>(`/topics/${id}/render-final`, { method: "POST" }),
   channels: () => request<PublicationChannel[]>("/publication-channels"),
   publications: () => request<Publication[]>("/publications"),

@@ -12,7 +12,7 @@ from app.schemas.publications import (
     Publication,
     PublicationChannel,
 )
-from app.schemas.topics import Topic, TopicScript, TopicStatus, TopicUpdateRequest
+from app.schemas.topics import ScriptUpdateRequest, Topic, TopicScript, TopicStatus, TopicUpdateRequest, VideoAsset
 
 
 def now() -> datetime:
@@ -265,6 +265,28 @@ def update_topic(topic_id: UUID, payload: TopicUpdateRequest) -> Topic:
     values = payload.model_dump(exclude_unset=True)
     index = TOPICS.index(topic)
     updated = topic.model_copy(update=values)
+    TOPICS[index] = updated
+    return updated
+
+
+def update_script(topic_id: UUID, payload: ScriptUpdateRequest) -> Topic:
+    topic = get_topic(topic_id)
+    scripts = [
+        script.model_copy(update={"full_script": payload.full_script})
+        if script.script_type == payload.script_type
+        else script
+        for script in topic.scripts
+    ]
+    index = TOPICS.index(topic)
+    updated = topic.model_copy(update={"scripts": scripts})
+    TOPICS[index] = updated
+    return updated
+
+
+def set_topic_assets(topic_id: UUID, assets: list[VideoAsset]) -> Topic:
+    topic = get_topic(topic_id)
+    index = TOPICS.index(topic)
+    updated = topic.model_copy(update={"assets": assets, "status": "video_draft_generated"})
     TOPICS[index] = updated
     return updated
 

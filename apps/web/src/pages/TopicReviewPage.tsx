@@ -1,4 +1,4 @@
-import { Check, Clapperboard, RefreshCcw, X } from "lucide-react";
+import { Check, Clapperboard, Download, RefreshCcw, Save, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { api } from "../lib/api";
@@ -11,6 +11,15 @@ export function TopicReviewPage() {
   const [selected, setSelected] = useState<Topic | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [scriptType, setScriptType] = useState<"30s" | "60s">("60s");
+  const [scriptDraft, setScriptDraft] = useState("");
+  const [draftMessage, setDraftMessage] = useState<string | null>(null);
+
+  function selectTopic(topic: Topic | null) {
+    setSelected(topic);
+    setScriptDraft(topic?.scripts.find((script) => script.script_type === scriptType)?.full_script ?? "");
+    setDraftMessage(null);
+  }
 
   async function load() {
     setLoading(true);
@@ -18,7 +27,7 @@ export function TopicReviewPage() {
     try {
       const data = await api.topics();
       setTopics(data);
-      setSelected(data[0] ?? null);
+      selectTopic(data[0] ?? null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "无法连接后端 API，请检查 VITE_API_BASE 或 CORS 配置。");
     } finally {
@@ -32,7 +41,7 @@ export function TopicReviewPage() {
     try {
       const data = await api.generateDailyTopics();
       setTopics(data);
-      setSelected(data[0] ?? null);
+      selectTopic(data[0] ?? null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "生成选题失败，请稍后重试。");
     } finally {
@@ -58,15 +67,37 @@ export function TopicReviewPage() {
     if (!selected) return;
     const updated = await action(selected.id);
     setTopics((items) => items.map((item) => (item.id === updated.id ? updated : item)));
-    setSelected(updated);
+    selectTopic(updated);
   }
 
   async function generateDraft() {
     if (!selected) return;
-    await api.generateDraft(selected.id);
-    const updated = { ...selected, status: "video_draft_generated" as const };
+    if (selected.status !== "approved" && selected.status !== "video_draft_generated") {
+      setError("请先通过选题，再生成视频草稿。");
+      return;
+    }
+    await saveScript();
+    const result = await api.generateDraft(selected.id, scriptType);
+    const updated = result.topic;
     setTopics((items) => items.map((item) => (item.id === selected.id ? updated : item)));
+    selectTopic(updated);
+    setDraftMessage(result.message);
+  }
+
+  async function saveScript() {
+    if (!selected) return;
+    const updated = await api.updateScript(selected.id, {
+      script_type: scriptType,
+      full_script: scriptDraft,
+    });
+    setTopics((items) => items.map((item) => (item.id === updated.id ? updated : item)));
     setSelected(updated);
+    setDraftMessage("脚本已保存。");
+  }
+
+  function changeScriptType(nextType: "30s" | "60s") {
+    setScriptType(nextType);
+    setScriptDraft(selected?.scripts.find((script) => script.script_type === nextType)?.full_script ?? "");
   }
 
   return (
@@ -108,7 +139,7 @@ export function TopicReviewPage() {
                   selected?.id === topic.id ? "border-gray-900" : "border-gray-200"
                 }`}
                 key={topic.id}
-                onClick={() => setSelected(topic)}
+                onClick={() => selectTopic(topic)}
               >
                 <div className="flex items-start justify-between gap-3">
                   <div>
@@ -155,13 +186,36 @@ export function TopicReviewPage() {
               <InfoBlock label="封面标题" value={selected.cover_title} />
             </div>
 
-            <div className="mt-5 space-y-4">
-              {selected.scripts.map((script) => (
-                <div className="rounded-md border border-gray-200 p-4" key={script.script_type}>
-                  <div className="mb-2 text-sm font-semibold">{script.script_type} 口播脚本</div>
-                  <p className="text-sm leading-6 text-gray-700">{script.full_script}</p>
+            <div className="mt-5 rounded-md border border-gray-200 p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-sm font-semibold">生成视频前编辑脚本</div>
+                  <div className="mt-1 text-xs text-gray-500">保存脚本后再生成视频草稿，字幕和 Remotion JSON 会使用这里的内容。</div>
                 </div>
-              ))}
+                <div className="inline-flex rounded-md border border-gray-200 bg-gray-50 p-1">
+                  {(["30s", "60s"] as const).map((type) => (
+                    <button
+                      className={`rounded px-3 py-1 text-xs font-medium ${scriptType === type ? "bg-white text-gray-950 shadow-sm" : "text-gray-500"}`}
+                      key={type}
+                      onClick={() => changeScriptType(type)}
+                    >
+                      {type}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <textarea
+                className="mt-4 min-h-44 w-full rounded-md border border-gray-300 p-3 text-sm leading-6 outline-none focus:border-gray-900"
+                value={scriptDraft}
+                onChange={(event) => setScriptDraft(event.target.value)}
+              />
+              <div className="mt-3 flex items-center justify-between">
+                <div className="text-xs text-gray-500">约 {scriptDraft.length} 字</div>
+                <button className="inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm" onClick={saveScript}>
+                  <Save size={16} />
+                  保存脚本
+                </button>
+              </div>
             </div>
 
             <div className="mt-5 rounded-md border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900">
@@ -177,7 +231,11 @@ export function TopicReviewPage() {
                 <RefreshCcw size={16} />
                 要求修改
               </button>
-              <button className="inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm" onClick={generateDraft}>
+              <button
+                className="inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50"
+                disabled={selected.status !== "approved" && selected.status !== "video_draft_generated"}
+                onClick={generateDraft}
+              >
                 <Clapperboard size={16} />
                 生成视频草稿
               </button>
@@ -186,6 +244,39 @@ export function TopicReviewPage() {
                 拒绝
               </button>
             </div>
+
+            {draftMessage && (
+              <div className="mt-5 rounded-md border border-teal-200 bg-teal-50 p-4 text-sm leading-6 text-teal-900">
+                {draftMessage}
+              </div>
+            )}
+
+            {selected.assets.length > 0 && (
+              <div className="mt-5 rounded-md border border-gray-200 p-4">
+                <div className="text-sm font-semibold">视频草稿资产</div>
+                <div className="mt-3 grid grid-cols-2 gap-3">
+                  {selected.assets.map((asset) => (
+                    <a
+                      className={`flex items-center justify-between rounded-md border px-3 py-2 text-sm ${
+                        asset.render_status === "pending" ? "border-amber-200 bg-amber-50 text-amber-900" : "border-gray-200 text-gray-700 hover:border-gray-400"
+                      }`}
+                      download={asset.file_name}
+                      href={asset.download_url}
+                      key={`${asset.asset_type}-${asset.file_name}`}
+                      onClick={(event) => {
+                        if (asset.render_status === "pending") event.preventDefault();
+                      }}
+                    >
+                      <span>{asset.file_name}</span>
+                      <Download size={15} />
+                    </a>
+                  ))}
+                </div>
+                <div className="mt-3 text-xs leading-5 text-gray-500">
+                  MP4 当前为待渲染状态；SRT、发布文案和 Remotion JSON 可先下载审核。接入 Remotion Worker 后会替换为真实 MP4。
+                </div>
+              </div>
+            )}
           </section>
         )}
       </main>

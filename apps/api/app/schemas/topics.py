@@ -28,6 +28,13 @@ class TopicScript(BaseModel):
     estimated_duration_seconds: int
 
 
+class VideoAsset(BaseModel):
+    asset_type: Literal["mp4", "srt", "cover", "publish_copy", "remotion_json"]
+    file_name: str
+    download_url: str
+    render_status: Literal["pending", "completed", "failed"] = "completed"
+
+
 class Topic(BaseModel):
     id: UUID
     production_date: date
@@ -46,6 +53,7 @@ class Topic(BaseModel):
     tags: list[str]
     scripts: list[TopicScript]
     created_at: datetime
+    assets: list[VideoAsset] = []
 
 
 class GenerateDailyTopicsRequest(BaseModel):
@@ -68,3 +76,19 @@ class TopicUpdateRequest(BaseModel):
     cover_title: Optional[str] = None
     risk_notice: Optional[str] = None
     publish_copy: Optional[str] = None
+
+
+class ScriptUpdateRequest(BaseModel):
+    script_type: Literal["30s", "60s"]
+    full_script: str
+
+
+class VideoDraftRequest(BaseModel):
+    script_type: Literal["30s", "60s"] = "60s"
+    template: str = "finance_advisory_dark"
+
+
+class VideoDraftResponse(BaseModel):
+    topic: Topic
+    assets: list[VideoAsset]
+    message: str
