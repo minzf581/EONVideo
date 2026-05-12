@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from datetime import date
 from uuid import UUID
 
 from fastapi import APIRouter, HTTPException, Query
@@ -20,8 +19,7 @@ def list_topics(status: Optional[TopicStatus] = Query(default=None)) -> list[Top
 
 @router.post("/generate-daily", response_model=list[Topic])
 def generate_daily_topics(payload: GenerateDailyTopicsRequest) -> list[Topic]:
-    topics = mock_store.list_topics()
-    return topics[: payload.count]
+    return mock_store.ensure_daily_topics(payload.count)
 
 
 @router.get("/{topic_id}", response_model=Topic)

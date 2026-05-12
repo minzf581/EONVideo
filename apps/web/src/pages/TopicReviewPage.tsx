@@ -13,10 +13,24 @@ export function TopicReviewPage() {
 
   async function load() {
     setLoading(true);
-    const data = await api.topics();
-    setTopics(data);
-    setSelected(data[0] ?? null);
-    setLoading(false);
+    try {
+      const data = await api.topics();
+      setTopics(data);
+      setSelected(data[0] ?? null);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function generateDailyTopics() {
+    setLoading(true);
+    try {
+      const data = await api.generateDailyTopics();
+      setTopics(data);
+      setSelected(data[0] ?? null);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -56,7 +70,7 @@ export function TopicReviewPage() {
             <h1 className="text-xl font-semibold">每日 AI 热点短视频审核</h1>
             <p className="mt-1 text-sm text-gray-500">先审核选题，再人工确认生成最终视频。</p>
           </div>
-          <button className="inline-flex items-center gap-2 rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white" onClick={load}>
+          <button className="inline-flex items-center gap-2 rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white" onClick={generateDailyTopics}>
             <RefreshCcw size={16} />
             生成今日 10 个选题
           </button>

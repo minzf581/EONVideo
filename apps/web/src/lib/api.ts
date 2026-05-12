@@ -25,6 +25,15 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 
 export const api = {
   topics: () => request<Topic[]>("/topics"),
+  generateDailyTopics: () =>
+    request<Topic[]>("/topics/generate-daily", {
+      method: "POST",
+      body: JSON.stringify({
+        production_date: new Date().toISOString().slice(0, 10),
+        count: 10,
+        use_performance_learning: true,
+      }),
+    }),
   approveTopic: (id: string) => request<Topic>(`/topics/${id}/approve`, { method: "POST", body: "{}" }),
   rejectTopic: (id: string) => request<Topic>(`/topics/${id}/reject`, { method: "POST", body: "{}" }),
   requestRevision: (id: string) => request<Topic>(`/topics/${id}/request-revision`, { method: "POST", body: "{}" }),
@@ -41,4 +50,3 @@ export const api = {
   dashboard: () => request<{ publication_count: number; snapshot_count: number; analysis_count: number; top_topics: PerformanceAnalysis[] }>("/performance/dashboard"),
   learningSummary: () => request<{ active_rules: number; summary: string[] }>("/performance/learning-summary"),
 };
-
