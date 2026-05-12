@@ -155,6 +155,22 @@ create table if not exists video_performance_analyses (
   updated_at timestamptz not null default now()
 );
 
+create table if not exists render_jobs (
+  id uuid primary key default gen_random_uuid(),
+  status text not null default 'pending',
+  payload jsonb not null default '{}'::jsonb,
+  video_url text,
+  error_message text,
+  retry_count integer not null default 0,
+  created_at timestamp not null default now(),
+  updated_at timestamp not null default now(),
+  completed_at timestamp
+);
+
+create index if not exists idx_render_jobs_pending
+  on render_jobs (created_at)
+  where status = 'pending';
+
 insert into publication_channels (name, platform, account_name)
 values
   ('微信视频号', 'wechat_channels', '默认账号'),
