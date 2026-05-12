@@ -1,0 +1,22 @@
+{
+  "name": "@eonvideo/remotion",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "preview": "remotion studio",
+    "render": "remotion render FinanceAdvisoryVideo out/video.mp4"
+  },
+  "dependencies": {
+    "@remotion/cli": "^4.0.258",
+    "remotion": "^4.0.258",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.2",
+    "@types/react-dom": "^19.0.2",
+    "typescript": "^5.7.2"
+  }
+}
