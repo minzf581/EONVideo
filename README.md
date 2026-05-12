@@ -33,6 +33,22 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload --port 8000
 ```
 
+## Railway 部署
+
+后端服务 Root Directory 设为：
+
+```text
+apps/api
+```
+
+Railpack 会读取 [apps/api/railpack.json](</Users/lewis_1/source code/EONVideo/apps/api/railpack.json>) 并使用以下启动命令：
+
+```bash
+uvicorn app.main:app --host 0.0.0.0 --port $PORT
+```
+
+Railway 会自动注入 `$PORT`，不需要手动写死端口。
+
 ```bash
 cd apps/web
 npm install
@@ -50,4 +66,3 @@ npm run preview
 - `http://localhost:5173/review/topics`: 选题审核
 - `http://localhost:5173/publications`: 发布反馈
 - `http://localhost:5173/performance`: 内容表现分析
-
