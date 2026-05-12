@@ -35,7 +35,9 @@ uvicorn app.main:app --reload --port 8000
 
 ## Railway 部署
 
-后端服务 Root Directory 设为：
+### 后端 API 服务
+
+Root Directory 设为：
 
 ```text
 apps/api
@@ -48,6 +50,36 @@ uvicorn app.main:app --host 0.0.0.0 --port $PORT
 ```
 
 Railway 会自动注入 `$PORT`，不需要手动写死端口。
+
+后端服务根路径 `/` 只用于确认 API 正常运行，真正的 React 审核后台需要部署前端服务。
+
+### 前端 Web 服务
+
+新增一个 Railway Service，Root Directory 设为：
+
+```text
+apps/web
+```
+
+构建命令：
+
+```bash
+npm run build
+```
+
+启动命令由 [apps/web/railpack.json](</Users/lewis_1/source code/EONVideo/apps/web/railpack.json>) 指定：
+
+```bash
+npm run start
+```
+
+前端服务需要配置环境变量，指向后端 API 服务：
+
+```text
+VITE_API_BASE=https://你的后端服务域名/api/v1
+```
+
+如果你只有一个 Railway 服务且 Root Directory 是 `apps/api`，打开域名看到的是 API 状态页，不会是 React 审核后台。
 
 ```bash
 cd apps/web
