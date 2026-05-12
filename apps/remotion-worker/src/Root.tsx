@@ -1,5 +1,5 @@
 import React from "react";
-import { Composition } from "remotion";
+import { Composition, registerRoot } from "remotion";
 
 import { CapitalNews, capitalNewsSchema } from "./templates/CapitalNews.js";
 
@@ -25,3 +25,4 @@ export function RemotionRoot() {
   );
 }
 
+registerRoot(RemotionRoot);
