@@ -6,6 +6,7 @@ from fastapi.responses import HTMLResponse, Response
 
 from app.api.publications import router as publications_router
 from app.api.topics import router as topics_router
+from app.api.video_jobs import router as video_jobs_router
 from app.core.config import settings
 
 app = FastAPI(title=settings.app_name)
@@ -21,6 +22,7 @@ app.add_middleware(
 
 app.include_router(topics_router, prefix=settings.api_prefix)
 app.include_router(publications_router, prefix=settings.api_prefix)
+app.include_router(video_jobs_router, prefix=settings.api_prefix)
 
 
 @app.get("/health")

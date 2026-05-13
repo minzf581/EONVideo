@@ -97,7 +97,11 @@ export function TopicReviewPage() {
     const updated = result.topic;
     setTopics((items) => items.map((item) => (item.id === selected.id ? updated : item)));
     selectTopic(updated);
-    setDraftMessage(result.message);
+    const payload = { ...buildVideoPayload(updated, scriptType), script: scriptDraft, scriptType };
+    const job = await api.createVideoJob(updated.id, payload);
+    setVideoForm(payload);
+    setVideoJobs((items) => [job, ...items.filter((item) => item.id !== job.id)]);
+    setDraftMessage(`${result.message} 已同步创建视频任务，可在下方或左侧“视频任务”菜单查看渲染状态。`);
   }
 
   async function loadVideoJobs(topicId: string) {

@@ -49,6 +49,7 @@ export const api = {
       body: JSON.stringify({ script_type: scriptType, template: "finance_advisory_dark" }),
     }),
   renderFinal: (id: string) => request<{ message: string }>(`/topics/${id}/render-final`, { method: "POST" }),
+  allVideoJobs: () => request<VideoJob[]>("/video-jobs"),
   videoJobs: (topicId: string) => request<VideoJob[]>(`/topics/${topicId}/video-jobs`),
   createVideoJob: (topicId: string, payload: VideoJobPayload) =>
     request<VideoJob>(`/topics/${topicId}/video-jobs`, { method: "POST", body: JSON.stringify({ payload }) }),

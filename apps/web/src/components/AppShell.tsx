@@ -1,8 +1,9 @@
-import { BarChart3, ClipboardCheck, RadioTower } from "lucide-react";
+import { BarChart3, ClipboardCheck, RadioTower, Video } from "lucide-react";
 import type { ReactNode } from "react";
 
 const nav = [
   { href: "/review/topics", label: "选题审核", icon: ClipboardCheck },
+  { href: "/video-jobs", label: "视频任务", icon: Video },
   { href: "/publications", label: "发布反馈", icon: RadioTower },
   { href: "/performance", label: "效果学习", icon: BarChart3 },
 ];

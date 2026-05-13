@@ -5,12 +5,16 @@ import "./index.css";
 import { PerformancePage } from "./pages/PerformancePage";
 import { PublicationsPage } from "./pages/PublicationsPage";
 import { TopicReviewPage } from "./pages/TopicReviewPage";
+import { VideoJobsPage } from "./pages/VideoJobsPage";
 
 function App() {
   const path = window.location.pathname;
   let page = <TopicReviewPage />;
   if (path.startsWith("/publications")) {
     page = <PublicationsPage />;
+  }
+  if (path.startsWith("/video-jobs")) {
+    page = <VideoJobsPage />;
   }
   if (path.startsWith("/performance")) {
     page = <PerformancePage />;
@@ -20,4 +24,3 @@ function App() {
 }
 
 createRoot(document.getElementById("root")!).render(<App />);
-

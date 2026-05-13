@@ -74,19 +74,30 @@ def row_to_job(row: dict[str, Any]) -> VideoJob:
     )
 
 
-def list_jobs(topic_id: UUID) -> list[VideoJob]:
+def list_jobs(topic_id: UUID | None = None) -> list[VideoJob]:
     ensure_table()
     with connect() as conn:
         with conn.cursor() as cur:
-            cur.execute(
-                """
-                select *
-                from render_jobs
-                where payload->>'topic_id' = %s
-                order by created_at desc
-                """,
-                (str(topic_id),),
-            )
+            if topic_id:
+                cur.execute(
+                    """
+                    select *
+                    from render_jobs
+                    where payload->>'topic_id' = %s
+                    order by created_at desc
+                    """,
+                    (str(topic_id),),
+                )
+            else:
+                cur.execute(
+                    """
+                    select *
+                    from render_jobs
+                    where payload ? 'topic_id'
+                    order by created_at desc
+                    limit 200
+                    """
+                )
             return [row_to_job(row) for row in cur.fetchall()]
 
 
