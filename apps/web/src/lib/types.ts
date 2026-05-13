@@ -59,6 +59,37 @@ export interface Topic {
   assets: VideoAsset[];
 }
 
+export type VideoJobStatus = "pending" | "processing" | "completed" | "failed";
+
+export interface VideoJobPayload {
+  topic_id: string;
+  title: string;
+  subtitle: string;
+  script: string;
+  bullets: string[];
+  brandName: string;
+  cta: string;
+  durationSeconds: number;
+  fps: number;
+  template: string;
+  style: string;
+  targetPlatform: string;
+  coverTitle: string;
+  scriptType: string;
+}
+
+export interface VideoJob {
+  id: string;
+  status: VideoJobStatus;
+  payload: VideoJobPayload;
+  video_url?: string | null;
+  error_message?: string | null;
+  retry_count: number;
+  created_at: string;
+  updated_at: string;
+  completed_at?: string | null;
+}
+
 export interface PublicationChannel {
   id: string;
   name: string;

@@ -5,6 +5,8 @@ import type {
   Publication,
   PublicationChannel,
   Topic,
+  VideoJob,
+  VideoJobPayload,
 } from "./types";
 
 type ScriptType = "30s" | "60s" | "douyin" | "wechat_channels" | "xiaohongshu";
@@ -47,6 +49,13 @@ export const api = {
       body: JSON.stringify({ script_type: scriptType, template: "finance_advisory_dark" }),
     }),
   renderFinal: (id: string) => request<{ message: string }>(`/topics/${id}/render-final`, { method: "POST" }),
+  videoJobs: (topicId: string) => request<VideoJob[]>(`/topics/${topicId}/video-jobs`),
+  createVideoJob: (topicId: string, payload: VideoJobPayload) =>
+    request<VideoJob>(`/topics/${topicId}/video-jobs`, { method: "POST", body: JSON.stringify({ payload }) }),
+  updateVideoJob: (topicId: string, jobId: string, payload: VideoJobPayload) =>
+    request<VideoJob>(`/topics/${topicId}/video-jobs/${jobId}`, { method: "PATCH", body: JSON.stringify({ payload }) }),
+  retryVideoJob: (topicId: string, jobId: string) =>
+    request<VideoJob>(`/topics/${topicId}/video-jobs/${jobId}/retry`, { method: "POST" }),
   channels: () => request<PublicationChannel[]>("/publication-channels"),
   publications: () => request<Publication[]>("/publications"),
   createPublication: (topicId: string, payload: { channel_id: string; platform: Platform; published_url: string; published_at: string; notes?: string }) =>
