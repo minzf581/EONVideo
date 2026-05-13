@@ -378,6 +378,79 @@ def recommended_script_angle(item: NewsItem) -> str:
     return f"不要讲成新闻播报，建议讲“{item.title}背后的资本逻辑”：先说老板为什么关心，再讲对融资、上市路径、现金流或全球化结构的影响。"
 
 
+def infer_pain_point(item: NewsItem) -> str:
+    text = f"{item.title} {item.summary}".lower()
+    if item.category == "hongkong_ipo" or any(keyword in text for keyword in ["ipo", "上市", "红筹", "h股"]):
+        return "准备上市或 Pre-IPO 融资，但不确定红筹、H 股、港股、新加坡或境内路径如何取舍，股权架构和投资人故事也还没提前准备。"
+    if item.category == "family_office" or any(keyword in text for keyword in ["家族办公室", "家办", "海外资产"]):
+        return "企业家家庭想做海外资产配置和传承安排，但担心合规、税务、投资管理和家族治理被简单包装成概念。"
+    if item.category == "rwa" or "rwa" in text:
+        return "看到 RWA 和跨境资本的新机会，但不清楚底层资产、监管边界、投资人适当性和退出路径能否真正跑通。"
+    if item.category == "enterprise_globalization" or "出海" in text:
+        return "海外业务已经启动，但控股结构、资金回流、融资主体、海外团队和投资人沟通没有同步设计。"
+    if item.category == "singapore_capital_market" or "新加坡" in text:
+        return "想借新加坡做海外融资、区域总部或家族办公室，但不清楚它到底是资本路径、税务结构，还是资产配置工具。"
+    if item.category == "corporate_finance" or any(keyword in text for keyword in ["现金流", "并购", "定向增发", "供应链金融"]):
+        return "企业经营压力和增长需求同时存在，老板需要判断现金流、融资方式、并购节奏和资本结构能不能支撑下一阶段。"
+    return "看到了热点，但不知道它会如何影响融资窗口、上市路径、海外架构、家族资产安排和投资人判断。"
+
+
+def script_theme(item: NewsItem) -> dict[str, str]:
+    text = f"{item.title} {item.summary}".lower()
+    if item.category == "hongkong_ipo" or any(keyword in text for keyword in ["ipo", "上市", "红筹", "h股"]):
+        return {
+            "hook": "最近很多准备上市的老板，开始重新看红筹、H 股和港股路径。",
+            "capital_logic": "这背后不是简单的上市地点选择，而是股权架构、境外主体、投资人画像和退出预期的重新匹配。",
+            "decision": "真正要提前判断的是：收入结构支不支持这个市场，老股东能不能接受重组成本，下一轮投资人希望看到什么资本故事。",
+            "business": "适合切入上市路径评估、红筹架构梳理、Pre-IPO 融资材料和投资人沟通。",
+        }
+    if item.category == "family_office" or any(keyword in text for keyword in ["家族办公室", "家办", "海外资产"]):
+        return {
+            "hook": "家族办公室这类话题，最怕被讲成身份或噱头。",
+            "capital_logic": "它的本质是把家族资产、投资权限、风险控制和传承治理放进一个长期合规框架。",
+            "decision": "企业家家庭真正要问的是：资产是否需要跨市场配置，谁负责投资决策，下一代治理和税务法律意见如何衔接。",
+            "business": "适合切入新加坡家办设立评估、全球资产配置框架和家族治理方案。",
+        }
+    if item.category == "rwa" or "rwa" in text:
+        return {
+            "hook": "RWA 热的时候，老板最不能只看融资想象力。",
+            "capital_logic": "RWA 的关键不是把资产放到链上，而是底层资产是否真实、现金流是否清楚、监管边界和投资者适当性是否成立。",
+            "decision": "企业要先判断资产能不能标准化，收益权能不能解释清楚，海外投资人为什么愿意买，以及退出机制在哪里。",
+            "business": "适合切入 RWA 合规边界、资产证券化、跨境融资结构和投资人对接。",
+        }
+    if item.category == "enterprise_globalization" or "出海" in text:
+        return {
+            "hook": "企业出海已经不是注册海外公司这么简单。",
+            "capital_logic": "现在的出海进入第二阶段，业务、供应链、融资主体、控股架构和海外投资人沟通要一起设计。",
+            "decision": "老板要判断海外收入放在哪里，利润如何合规沉淀，未来融资用哪个主体讲故事，团队和股权激励如何安排。",
+            "business": "适合切入企业出海资本结构、海外融资准备和国际投资人故事设计。",
+        }
+    if item.category == "singapore_capital_market" or "新加坡" in text:
+        return {
+            "hook": "新加坡相关热点，老板不要只理解成一个海外地点。",
+            "capital_logic": "它更像一个资本结构节点，连接区域总部、海外融资、家族办公室和国际投资人网络。",
+            "decision": "企业要先判断自己的海外收入、股东结构、融资币种和未来上市路径，是否真的适合把新加坡放进架构里。",
+            "business": "适合切入新加坡资本市场对接、海外融资路径和全球化架构设计。",
+        }
+    if item.category == "corporate_finance" or any(keyword in text for keyword in ["现金流", "并购", "定向增发", "供应链金融"]):
+        return {
+            "hook": "很多老板最近最焦虑的，不是增长，而是现金流和融资节奏。",
+            "capital_logic": "现金流压力背后，往往是融资结构、应收账款、供应链金融和并购节奏没有形成闭环。",
+            "decision": "企业要先看经营现金流能撑多久，债权和股权融资怎么组合，扩张、并购和定增是否会稀释长期控制权。",
+            "business": "适合切入融资方案、现金流诊断、并购节奏和资本结构优化。",
+        }
+    return {
+        "hook": "最近这个财经热点，老板不能只看表面热度。",
+        "capital_logic": "它背后真正重要的是融资窗口、资本结构和投资人判断正在变化。",
+        "decision": "企业要把热点翻译成自己的决策问题：影响融资吗，影响上市路径吗，影响海外架构和资产安全吗。",
+        "business": "适合切入海外融资、资本市场对接和全球化资本结构设计。",
+    }
+
+
+def script_client_phrase(target_client: str) -> str:
+    return target_client.rstrip("。；;，, ")
+
+
 def infer_topic_emotion(item: NewsItem) -> str:
     text = f"{item.title} {item.summary}".lower()
     if any(keyword in text for keyword in ["风险", "监管", "中美关系", "地缘", "波动"]):
@@ -393,32 +466,36 @@ def infer_topic_emotion(item: NewsItem) -> str:
     return "焦虑"
 
 
-def platform_scripts(title: str, target_client: str, pain_point: str, business_entry: str) -> list[TopicScript]:
+def platform_scripts(item: NewsItem, target_client: str, pain_point: str, business_entry: str) -> list[TopicScript]:
+    title = item.title
+    theme = script_theme(item)
+    business_line = business_entry if business_entry else theme["business"]
+    client_phrase = script_client_phrase(target_client)
     return [
         TopicScript(
             script_type="30s",
             estimated_duration_seconds=30,
-            full_script=f"最近很多老板都在看这个话题：{title}。真正值得关注的不是新闻本身，而是它会不会影响企业出海、融资节奏和资本结构。对{target_client}来说，{pain_point}。先把业务、股东结构和海外融资路径想清楚，再谈窗口。",
+            full_script=f"{theme['hook']}这次的热点是：{title}。{theme['capital_logic']}对{client_phrase}来说，核心痛点是：{pain_point}{theme['decision']}以上只是市场观察，不构成投资建议。",
         ),
         TopicScript(
             script_type="60s",
             estimated_duration_seconds=60,
-            full_script=f"最近很多老板开始重新评估一个问题：{title}。这件事背后，其实是资本逻辑在变。过去企业更关心哪里估值高，现在更关键的是：业务全球化、股东结构、上市地、海外投资人画像能不能互相匹配。对{target_client}来说，{pain_point}。这时要看的不是单一热点，而是企业全球化的第二阶段：用资本结构服务业务出海，用海外融资连接长期增长。可切入的方向是：{business_entry}。以上只是市场观察，不构成投资建议。",
+            full_script=f"{theme['hook']}今天这个热点是：{title}。很多人会把它当成一条财经新闻，但我更建议从资本逻辑看。{theme['capital_logic']}对{client_phrase}来说，真正的问题不是追不追热点，而是：{pain_point}{theme['decision']}如果企业已经进入融资、上市、出海或资产配置阶段，这类变化最好提前放进结构设计里。可切入的方向是：{business_line}以上只是市场观察，不构成投资、法律或税务建议。",
         ),
         TopicScript(
             script_type="douyin",
             estimated_duration_seconds=45,
-            full_script=f"很多老板没意识到，{title}，表面是热点，背后是融资窗口和资本结构的问题。企业出海不是注册一家公司就结束了，而是要提前想清楚新加坡、香港、海外融资和投资人故事怎么配。{pain_point}。这类问题越晚处理，融资时越被动。",
+            full_script=f"很多老板没意识到，{title}，表面是热点，背后是一个很现实的资本问题。{theme['capital_logic']}{theme['decision']}如果你正在考虑融资、上市、出海或海外资产配置，这件事要提前看，不要等到投资人问起来才补结构。",
         ),
         TopicScript(
             script_type="wechat_channels",
             estimated_duration_seconds=60,
-            full_script=f"最近老板圈讨论比较多的是：{title}。我更建议从资本逻辑看这件事。它提醒中国企业，全球化已经进入第二阶段，重点不只是卖产品到海外，而是同步建立资本结构、融资路径和国际投资人沟通体系。对{target_client}来说，核心问题是：{pain_point}。这背后可以延伸到{business_entry}。内容仅作市场观察。",
+            full_script=f"最近老板圈值得关注的一个话题是：{title}。我不建议把它当成普通资讯看，而要看它背后的决策含义。{theme['capital_logic']}对{target_client}来说，关键不是判断消息热不热，而是判断它是否改变融资、上市、出海或资产配置的路径。{theme['decision']}这背后可以延伸到{business_line}内容仅作市场观察。",
         ),
         TopicScript(
             script_type="xiaohongshu",
             estimated_duration_seconds=50,
-            full_script=f"一个值得收藏的趋势观察：{title}。很多人只看到了热点，但对中国企业老板和高净值家庭来说，更重要的是资产安全、海外融资和全球资产配置的框架。{pain_point}。如果要判断自己是否适合新加坡、香港 IPO、家族办公室或海外融资路径，先看目标、结构和合规边界。",
+            full_script=f"一个值得收藏的趋势观察：{title}。这条内容不要只看热闹，可以拆成三个问题：第一，{theme['capital_logic']}第二，{pain_point}第三，{theme['decision']}如果你在看融资、IPO、新加坡、家族办公室或企业出海，先看结构和合规边界，再看机会。",
         ),
     ]
 
@@ -428,7 +505,7 @@ def build_live_topic(item: NewsItem) -> Topic:
     dimensions = score_dimensions(item)
     target_client = infer_client(item.category)
     business_entry = infer_business_entry(item.category)
-    pain_point = "看到了热点，但不知道它会如何影响融资窗口、上市路径、海外架构、家族资产安排和投资人判断。"
+    pain_point = infer_pain_point(item)
     source_line = f"来源：{item.source}；原文：{item.url}"
     topic_title = f"{item.title}，中国老板真正该看什么？"
     risk_notice = "以上内容基于公开热点源整理，仅作市场观察和商业信息分享，不构成投资、法律、税务、移民或证券建议。"
@@ -461,7 +538,7 @@ def build_live_topic(item: NewsItem) -> Topic:
         risk_notice=risk_notice,
         publish_copy=f"{item.title}\n\n这不是国际新闻翻译，而是给中国老板看的资本逻辑：它可能影响企业全球化、海外融资、香港/新加坡路径、家族办公室和全球资产配置判断。\n\n{risk_notice}\n\n{source_line}",
         tags=make_tags(item),
-        scripts=platform_scripts(item.title, target_client, pain_point, business_entry),
+        scripts=platform_scripts(item, target_client, pain_point, business_entry),
         created_at=datetime.now(timezone.utc),
     )
 

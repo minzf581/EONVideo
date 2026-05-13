@@ -34,10 +34,10 @@ TOPIC_KEYWORDS = [
 
 CATEGORY_KEYWORDS = {
     "hongkong_ipo": ["IPO", "上市", "H股", "红筹", "递表", "港股"],
-    "singapore_capital_market": ["新加坡", "海外融资", "区域总部"],
-    "rwa": ["RWA", "真实世界资产", "代币化", "数字资产"],
     "family_office": ["家族办公室", "家办", "海外资产", "资产配置"],
-    "enterprise_globalization": ["企业出海", "出海", "全球化", "供应链"],
+    "rwa": ["RWA", "真实世界资产", "代币化", "数字资产"],
+    "enterprise_globalization": ["企业出海", "出海", "全球化"],
+    "singapore_capital_market": ["新加坡", "海外融资", "区域总部"],
     "corporate_finance": ["融资", "并购", "定向增发", "现金流", "供应链金融", "企业家"],
 }
 
