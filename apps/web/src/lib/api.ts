@@ -7,6 +7,8 @@ import type {
   Topic,
 } from "./types";
 
+type ScriptType = "30s" | "60s" | "douyin" | "wechat_channels" | "xiaohongshu";
+
 const API_BASE = import.meta.env.VITE_API_BASE ?? "http://localhost:8000/api/v1";
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
@@ -30,16 +32,16 @@ export const api = {
       method: "POST",
       body: JSON.stringify({
         production_date: new Date().toISOString().slice(0, 10),
-        count: 10,
+        count: 20,
         use_performance_learning: true,
       }),
     }),
   approveTopic: (id: string) => request<Topic>(`/topics/${id}/approve`, { method: "POST", body: "{}" }),
   rejectTopic: (id: string) => request<Topic>(`/topics/${id}/reject`, { method: "POST", body: "{}" }),
   requestRevision: (id: string) => request<Topic>(`/topics/${id}/request-revision`, { method: "POST", body: "{}" }),
-  updateScript: (id: string, payload: { script_type: "30s" | "60s"; full_script: string }) =>
+  updateScript: (id: string, payload: { script_type: ScriptType; full_script: string }) =>
     request<Topic>(`/topics/${id}/scripts`, { method: "PATCH", body: JSON.stringify(payload) }),
-  generateDraft: (id: string, scriptType: "30s" | "60s" = "60s") =>
+  generateDraft: (id: string, scriptType: ScriptType = "60s") =>
     request<{ topic: Topic; assets: Topic["assets"]; message: string }>(`/topics/${id}/video-draft`, {
       method: "POST",
       body: JSON.stringify({ script_type: scriptType, template: "finance_advisory_dark" }),

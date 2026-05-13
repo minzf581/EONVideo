@@ -32,13 +32,24 @@ def list_topics(status: Optional[TopicStatus] = Query(default=None)) -> list[Top
 async def generate_daily_topics(payload: GenerateDailyTopicsRequest) -> list[Topic]:
     try:
         live_topics = await generate_live_topics(payload.count)
-        if live_topics:
-            mock_store.replace_topics(live_topics)
-            return live_topics
-    except Exception:
-        # Keep the production page usable if an upstream RSS source is temporarily unavailable.
-        return mock_store.ensure_daily_topics(payload.count)
-    return mock_store.ensure_daily_topics(payload.count)
+    except Exception as exc:
+        raise HTTPException(
+            status_code=502,
+            detail=(
+                "热点采集失败，后端不会使用 mock 选题兜底。"
+                "请接入可用的抖音/视频号/公众号/小红书/热搜数据接口后重试。"
+            ),
+        ) from exc
+    if not live_topics:
+        raise HTTPException(
+            status_code=503,
+            detail=(
+                "当前没有采集到可用于生成选题的真实热点，后端不会使用 mock 选题兜底。"
+                "请提供可用热点接口或手动导入真实热点数据。"
+            ),
+        )
+    mock_store.replace_topics(live_topics)
+    return live_topics
 
 
 @router.get("/{topic_id}", response_model=Topic)

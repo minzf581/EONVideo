@@ -14,7 +14,7 @@ export type TopicStatus =
 export type Platform = "wechat_channels" | "douyin" | "xiaohongshu";
 
 export interface TopicScript {
-  script_type: "30s" | "60s";
+  script_type: "30s" | "60s" | "douyin" | "wechat_channels" | "xiaohongshu";
   full_script: string;
   estimated_duration_seconds: number;
 }
@@ -33,7 +33,19 @@ export interface Topic {
   category: string;
   score: number;
   risk_score: number;
+  topic_emotion: string;
+  china_boss_relevance_score: number;
+  enterprise_globalization_score: number;
+  overseas_capital_score: number;
+  wechat_channels_potential_score: number;
+  douyin_potential_score: number;
+  comment_controversy_score: number;
+  collection_value_score: number;
+  international_news_score: number;
   topic_title: string;
+  hot_source: string;
+  why_short_video: string;
+  recommended_script_angle: string;
   hot_summary: string;
   target_client: string;
   user_pain_point: string;

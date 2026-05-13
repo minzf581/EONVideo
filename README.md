@@ -1,6 +1,6 @@
-# 每日 AI 热点短视频生产系统
+# 中国老板全球化资本趋势短视频系统
 
-面向财经、AI、IPO、RWA、新加坡/香港资本市场、企业出海和家族办公室相关热点的短视频生产系统。
+面向中国企业老板、准备融资企业、IPO 辅导机构、高净值家庭和国际资本顾问场景的短视频生产系统。系统不做“国际新闻翻译”，而是把国内短视频平台热点转译成企业全球化、海外融资、新加坡资本市场、香港 IPO、家族办公室、RWA 和全球资产配置相关的资本逻辑。
 
 ## 当前 MVP
 
@@ -10,7 +10,9 @@
 - 发布效果反馈模块
 - 支持平台：微信视频号、抖音、小红书
 - Remotion 竖屏财经短视频模板占位
-- 真实 RSS 热点采集：Google News RSS、MAS RSS、HKEX RSS 等公开源
+- 热点采集优先级：抖音/视频号/公众号/小红书等中文平台方向优先，国际媒体仅作为辅助视角
+- 新增中国老板相关度、企业全球化相关度、海外资本相关度、平台传播潜力等评分字段
+- 自动生成抖音版、视频号版、小红书版脚本
 
 ## 目录
 
@@ -149,23 +151,84 @@ Worker 行为：
 }
 ```
 
-## 真实热点采集
+## 热点采集与选题方向
 
-点击“生成今日 10 个选题”时，后端会优先从公开 RSS 源抓取最新新闻，再按业务相关度生成审核选题。
+点击“生成今日 10 个选题”时，后端会优先按“中国老板关注的国际资本与企业全球化”方向抓取和排序热点。当前 MVP 使用公开可访问入口模拟国内平台热点方向；后续接入抖音、视频号、小红书、公众号、雪球等数据接口时，沿用同一套字段和评分模型。
 
-当前内置方向：
+热点源权重：
 
-- AI / 科技融资
-- 新加坡资本市场
-- 香港 IPO
-- RWA / 资产代币化
-- 新加坡家族办公室
-- 中国企业出海
-- 海外融资与全球化资本结构
+- 抖音热点、抖音财经、趋势榜、搜索热词、热门评论关键词：40%
+- 微信视频号财经/企业家内容、微信公众号财经文章：25%
+- 小红书商业/海外资产/新加坡/家办/企业出海内容：20%
+- 百度热搜、微博财经、雪球讨论：10%
+- Bloomberg、Reuters、CNBC、WSJ、Financial Times：5%，仅用于国际视角校准
 
-如果公开 RSS 源暂时不可用，系统会回退到本地种子选题，避免线上页面空白。
+选题链路：
 
-后续接入 OpenAI 后，可以把 `apps/api/app/services/news_ingestion.py` 里的规则生成替换为模型生成。
+```text
+热点 -> 中国老板痛点 -> 资本逻辑 -> 企业全球化影响 -> 海外融资/新加坡/家办/RWA 切入点
+```
+
+如果公开热点源暂时不可用，后端会直接返回错误，不再回退到本地种子选题。Prompt 方案见 [china_boss_global_capital.md](/Users/minzhenfa/sourceCode/EONVideo/apps/api/app/prompts/china_boss_global_capital.md)。
+
+当前仍需要你提供或确认可用的数据接口：
+
+- 抖音热点/财经热点/趋势榜/搜索热词/评论关键词接口
+- 视频号热门财经/企业家内容接口，或公众号文章源
+- 小红书商业/海外资产/企业出海内容接口
+- 百度热搜、微博财经、雪球热门讨论接口
+
+## 中文财经热点选题引擎
+
+后端已在原有 `news_ingestion` 选题引擎中加入 Source Adapter 架构，位置：
+
+```text
+apps/api/app/services/source_adapters/
+  baidu_hotsearch.py
+  weibo_hotsearch.py
+  finance_news.py
+  wechat_article_source.py
+  third_party_hot_api.py
+  manual_seed_source.py
+```
+
+每条热点会统一转成：
+
+```json
+{
+  "platform": "weibo",
+  "title": "热点标题",
+  "url": "https://example.com",
+  "heat_score": 88,
+  "published_at": "2026-05-13T10:00:00+08:00",
+  "keywords": ["IPO", "融资"],
+  "category": "hongkong_ipo",
+  "raw": {}
+}
+```
+
+环境变量：
+
+```text
+HOT_API_BASE_URL=
+HOT_API_KEY=
+WECHAT_SOURCE_CONFIG=[]
+MANUAL_SEED_KEYWORDS=新加坡家族办公室,红筹架构IPO,企业出海海外融资
+FINANCE_NEWS_RSS_URLS=
+```
+
+`WECHAT_SOURCE_CONFIG` 使用 JSON 数组，例如：
+
+```json
+[
+  {
+    "name": "IPO早知道",
+    "url": "https://example.com/rss.xml",
+    "category": "hongkong_ipo",
+    "keywords": ["IPO", "上市", "融资"]
+  }
+]
+```
 
 ## 关键页面
 

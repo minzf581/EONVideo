@@ -23,7 +23,7 @@ TopicStatus = Literal[
 
 
 class TopicScript(BaseModel):
-    script_type: Literal["30s", "60s"]
+    script_type: Literal["30s", "60s", "douyin", "wechat_channels", "xiaohongshu"]
     full_script: str
     estimated_duration_seconds: int
 
@@ -42,7 +42,19 @@ class Topic(BaseModel):
     category: str
     score: float = Field(ge=0, le=100)
     risk_score: float = Field(ge=0, le=100)
+    topic_emotion: str = "机会"
+    china_boss_relevance_score: float = Field(default=0, ge=0, le=100)
+    enterprise_globalization_score: float = Field(default=0, ge=0, le=100)
+    overseas_capital_score: float = Field(default=0, ge=0, le=100)
+    wechat_channels_potential_score: float = Field(default=0, ge=0, le=100)
+    douyin_potential_score: float = Field(default=0, ge=0, le=100)
+    comment_controversy_score: float = Field(default=0, ge=0, le=100)
+    collection_value_score: float = Field(default=0, ge=0, le=100)
+    international_news_score: float = Field(default=0, ge=0, le=100)
     topic_title: str
+    hot_source: str = ""
+    why_short_video: str = ""
+    recommended_script_angle: str = ""
     hot_summary: str
     target_client: str
     user_pain_point: str
@@ -58,9 +70,9 @@ class Topic(BaseModel):
 
 class GenerateDailyTopicsRequest(BaseModel):
     production_date: date
-    count: int = Field(default=10, ge=1, le=20)
+    count: int = Field(default=20, ge=1, le=20)
     categories: list[str] = []
-    style: str = "finance_investment_banking_advisor"
+    style: str = "china_boss_global_capital_advisor"
     use_performance_learning: bool = True
 
 
@@ -79,12 +91,12 @@ class TopicUpdateRequest(BaseModel):
 
 
 class ScriptUpdateRequest(BaseModel):
-    script_type: Literal["30s", "60s"]
+    script_type: Literal["30s", "60s", "douyin", "wechat_channels", "xiaohongshu"]
     full_script: str
 
 
 class VideoDraftRequest(BaseModel):
-    script_type: Literal["30s", "60s"] = "60s"
+    script_type: Literal["30s", "60s", "douyin", "wechat_channels", "xiaohongshu"] = "60s"
     template: str = "finance_advisory_dark"
 
 

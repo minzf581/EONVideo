@@ -14,7 +14,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <aside className="fixed inset-y-0 left-0 w-64 border-r border-gray-200 bg-white">
         <div className="border-b border-gray-200 px-5 py-5">
           <div className="text-lg font-semibold text-gray-950">EONVideo</div>
-          <div className="mt-1 text-xs text-gray-500">AI 热点短视频生产系统</div>
+          <div className="mt-1 text-xs text-gray-500">中国老板全球化资本视频系统</div>
         </div>
         <nav className="space-y-1 p-3">
           {nav.map((item) => {
@@ -35,11 +35,10 @@ export function AppShell({ children }: { children: ReactNode }) {
           })}
         </nav>
         <div className="absolute bottom-0 border-t border-gray-200 p-4 text-xs leading-5 text-gray-500">
-          平台：微信视频号、抖音、小红书。系统只生成与反馈，不自动发布。
+          平台：视频号、抖音、小红书。核心：老板痛点、全球化、海外资本。
         </div>
       </aside>
       <main className="pl-64">{children}</main>
     </div>
   );
 }
-

@@ -1,13 +1,17 @@
-# 每日 AI 热点短视频生产系统设计
+# 中国老板全球化资本趋势短视频系统设计
 
 ## 1. 系统架构设计
 
 ### 1.1 目标定位
 
-本系统面向“财经、投行、国际资本顾问”风格的中文短视频生产流程。核心不是简单新闻搬运，而是每天从热点中筛选出能与以下业务发生连接的内容：
+本系统面向“中国老板关注的国际资本与企业全球化”短视频生产流程。核心不是国际新闻翻译，也不是 Bloomberg、Reuters、CNBC、TechCrunch 等国际媒体摘要，而是从中文短视频和中文商业内容平台的热点中筛选出能触发老板圈讨论的内容：
 
+- 热点背后的资本逻辑
+- 企业全球化趋势
+- 中国老板的焦虑与机会
 - 对接新加坡资本市场
 - 企业海外融资
+- 香港 IPO 路径变化
 - 新加坡家族办公室设立
 - 海外投资机会对接
 - 中国企业全球化资本结构设计
@@ -24,11 +28,11 @@
 
 ```mermaid
 flowchart LR
-    A["新闻源<br/>RSS / 网页 / 手动导入"] --> B["采集服务<br/>Ingestion Worker"]
+    A["中文热点源<br/>抖音 / 视频号 / 公众号 / 小红书 / 热搜 / 手动导入"] --> B["采集服务<br/>Ingestion Worker"]
     B --> C["新闻清洗与去重<br/>Normalizer"]
     C --> D[("PostgreSQL")]
-    D --> E["分类与评分服务<br/>Scoring Worker"]
-    E --> F["AI 选题生成服务<br/>OpenAI Adapter"]
+    D --> E["老板相关度评分服务<br/>Scoring Worker"]
+    E --> F["AI 选题与平台改写服务<br/>OpenAI Adapter"]
     F --> D
     D --> G["FastAPI 后端"]
     G --> H["React + Tailwind 审核后台"]
@@ -79,10 +83,11 @@ flowchart LR
 
 任务类型：
 
-- `fetch_news`: 定时抓取 RSS / 网页
+- `fetch_hotspots`: 定时抓取或导入抖音、视频号、公众号、小红书、热搜、雪球及辅助国际媒体热点
 - `normalize_news`: 清洗、去重、提取正文
-- `score_news`: 分类、热度、业务相关性评分
+- `score_hotspots`: 分类、中国老板相关度、企业全球化、海外资本与平台传播潜力评分
 - `generate_topics`: 每天生成 10 个短视频选题
+- `adapt_platform_scripts`: 生成抖音版、视频号版、小红书版脚本与标题
 - `generate_video_draft`: 生成 Remotion 输入 JSON
 - `render_video`: 渲染 MP4、SRT、封面图
 - `collect_video_metrics`: 发布后 24 小时内收集或提醒录入视频表现数据
@@ -98,12 +103,12 @@ flowchart LR
 
 预留 OpenAI API Adapter，避免业务代码直接依赖某个模型调用格式。
 
-AI 输出建议分三步：
+AI 输出建议分四步：
 
-1. 新闻理解：摘要、实体、风险点、分类标签。
-2. 业务匹配：判断是否能结合资本市场、融资、家办、RWA、出海等业务。
-3. 内容生产：生成 10 个选题及脚本、封面、分镜、风险提示。
-4. 表现学习：参考历史视频的观看、互动、转发、咨询线索表现，调整标题角度、客户痛点、业务切入点和脚本结构。
+1. 热点理解：摘要、实体、平台来源、评论高频词、风险点、分类标签。
+2. 老板相关度判断：热点为什么会影响中国企业老板、CFO、高净值家庭或 IPO 辅导机构。
+3. 资本逻辑转译：按“热点 -> 中国老板痛点 -> 资本逻辑 -> 企业全球化影响 -> 业务切入”生成选题。
+4. 平台适配与表现学习：生成抖音、视频号、小红书版本，并参考历史表现调整标题角度、客户痛点、业务切入点和脚本结构。
 
 #### 视频生成
 
@@ -164,12 +169,26 @@ docs/
 13. 系统分析不同选题、标题、封面、客户痛点、业务切入点的效果。
 14. 次日生成选题时，自动参考历史表现，优先推荐更容易带来关注、互动、转发和咨询线索的内容角度。
 
-### 1.6 分类与评分模型
+### 1.6 热点源优先级
 
-新闻分类：
+热点源权重：
 
-- AI / 科技
-- 财经 / 宏观
+- 抖音热点、抖音财经热点、趋势榜、搜索热词、企业家/商业/财经热门视频、评论区高频关键词：40%
+- 微信视频号热门财经内容、企业家内容、商业热点、微信公众号财经文章：25%
+- 小红书热门商业/海外内容：20%
+- 百度热搜、微博财经、雪球热门讨论：10%
+- Bloomberg、Reuters、CNBC、WSJ、Financial Times：5%，仅作国际视角校准
+
+重点关键词：
+
+- AI、IPO、新加坡、香港、家族办公室、企业出海、RWA、中美关系、美股、港股、比特币、全球化、海外融资、海外资产配置
+
+### 1.7 分类与评分模型
+
+内容分类：
+
+- AI 资本化
+- 中国老板焦虑
 - IPO / 上市
 - RWA / Web3 金融
 - 新加坡资本市场
@@ -182,27 +201,42 @@ docs/
 
 评分维度建议：
 
-- `hot_score`: 热点强度，0-100
-- `business_score`: 与业务相关度，0-100
-- `client_pain_score`: 是否能击中客户痛点，0-100
-- `content_score`: 是否适合短视频表达，0-100
+- `topic_emotion`: 焦虑 / 机会 / 趋势 / 风险 / 身份焦虑 / 资产安全 / IPO压力
+- `china_boss_relevance_score`: 中国企业老板相关度，0-100，权重最高
+- `enterprise_globalization_score`: 企业全球化相关度，0-100
+- `overseas_capital_score`: 海外资本相关度，0-100
+- `wechat_channels_potential_score`: 视频号传播潜力，0-100
+- `douyin_potential_score`: 抖音传播潜力，0-100
+- `comment_controversy_score`: 评论争议度，0-100
+- `collection_value_score`: 收藏价值，0-100
+- `international_news_score`: 国际热点程度，0-100，权重最低
 - `risk_score`: 合规或舆情风险，0-100，分数越高风险越大
-- `historical_performance_score`: 历史相似选题表现，0-100
 - `final_score`: 综合分
 
 推荐公式：
 
 ```text
 final_score =
-  hot_score * 0.25 +
-  business_score * 0.35 +
-  client_pain_score * 0.25 +
-  content_score * 0.15 -
-  risk_score * 0.30 +
-  historical_performance_score * 0.20
+  china_boss_relevance_score * 0.28 +
+  enterprise_globalization_score * 0.18 +
+  overseas_capital_score * 0.18 +
+  wechat_channels_potential_score * 0.10 +
+  douyin_potential_score * 0.09 +
+  comment_controversy_score * 0.06 +
+  collection_value_score * 0.06 +
+  international_news_score * 0.05 -
+  risk_score * 0.18
 ```
 
-### 1.7 发布反馈与选题优化闭环
+国际科技新闻翻译、OpenAI 功能更新、国外 AI 工具评测、海外互联网八卦、国外 VC 动态、美国科技公司财报默认降低权重。只有当它们直接关联中国企业融资、全球资本变化、中国企业出海或新加坡资本市场时，才进入候选选题。
+
+### 1.8 视频平台适配
+
+- 抖音版：Hook 强、情绪更强、节奏快，前 3 秒直接点出老板焦虑或机会。
+- 视频号版：更稳重、更专业，更像老板圈内容，强调资本逻辑和决策框架。
+- 小红书版：更像认知分享和趋势洞察，强调收藏价值、框架、清单和避坑。
+
+### 1.9 发布反馈与选题优化闭环
 
 发布效果反馈模块用于回答三个问题：
 
@@ -368,13 +402,18 @@ create table news_cluster_items (
 create table news_scores (
   id uuid primary key default gen_random_uuid(),
   cluster_id uuid references news_clusters(id) on delete cascade,
-  hot_score int not null default 0,
-  business_score int not null default 0,
-  client_pain_score int not null default 0,
-  content_score int not null default 0,
+  china_boss_relevance_score int not null default 0,
+  enterprise_globalization_score int not null default 0,
+  overseas_capital_score int not null default 0,
+  wechat_channels_potential_score int not null default 0,
+  douyin_potential_score int not null default 0,
+  comment_controversy_score int not null default 0,
+  collection_value_score int not null default 0,
+  international_news_score int not null default 0,
   risk_score int not null default 0,
   final_score numeric(6,2) not null default 0,
-  business_fit_reason text,
+  china_boss_fit_reason text,
+  capital_logic_reason text,
   risk_reason text,
   recommended_angle text,
   scored_by varchar(50) not null default 'ai',
@@ -398,6 +437,15 @@ create table content_topics (
   status varchar(50) not null default 'draft',
   -- draft, pending_review, approved, rejected, video_draft_generated, final_rendered
   topic_title text not null,
+  topic_emotion varchar(50) not null default '机会',
+  china_boss_relevance_score numeric(5,2) not null default 0,
+  enterprise_globalization_score numeric(5,2) not null default 0,
+  overseas_capital_score numeric(5,2) not null default 0,
+  wechat_channels_potential_score numeric(5,2) not null default 0,
+  douyin_potential_score numeric(5,2) not null default 0,
+  comment_controversy_score numeric(5,2) not null default 0,
+  collection_value_score numeric(5,2) not null default 0,
+  international_news_score numeric(5,2) not null default 0,
   hot_summary text not null,
   target_client text,
   user_pain_point text,
@@ -427,7 +475,7 @@ create index idx_content_topics_status on content_topics(status);
 create table topic_scripts (
   id uuid primary key default gen_random_uuid(),
   topic_id uuid references content_topics(id) on delete cascade,
-  script_type varchar(50) not null, -- 30s, 60s
+  script_type varchar(50) not null, -- 30s, 60s, douyin, wechat_channels, xiaohongshu
   hook text,
   body text not null,
   call_to_action text,
@@ -440,7 +488,27 @@ create table topic_scripts (
 );
 ```
 
-### 2.9 video_storyboards
+### 2.9 topic_platform_adaptations
+
+```sql
+create table topic_platform_adaptations (
+  id uuid primary key default gen_random_uuid(),
+  topic_id uuid references content_topics(id) on delete cascade,
+  platform varchar(100) not null,
+  hook_style varchar(100) not null,
+  tone varchar(100) not null,
+  title_variant text,
+  cover_title text,
+  publish_copy text,
+  script_id uuid references topic_scripts(id),
+  adaptation_payload jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique (topic_id, platform)
+);
+```
+
+### 2.10 video_storyboards
 
 ```sql
 create table video_storyboards (
@@ -472,7 +540,7 @@ create table video_storyboards (
 ]
 ```
 
-### 2.10 video_assets
+### 2.11 video_assets
 
 ```sql
 create table video_assets (
@@ -682,12 +750,14 @@ POST   /api/v1/news-sources/{source_id}/test-fetch
 
 ```json
 {
-  "name": "MAS News",
-  "source_type": "rss",
-  "url": "https://example.com/rss",
-  "language": "en",
-  "region": "singapore",
-  "category": "singapore_capital_market",
+  "name": "抖音财经趋势榜",
+  "source_type": "platform_hotspot",
+  "url": "https://example.com/douyin-hotspots",
+  "language": "zh",
+  "region": "china",
+  "platform": "douyin",
+  "category": "china_boss_global_capital",
+  "priority_weight": 0.4,
   "crawl_interval_minutes": 60
 }
 ```
@@ -736,14 +806,20 @@ GET /api/v1/news-clusters?date=2026-05-12&category=ipo&min_score=70
 ```json
 {
   "cluster_id": "uuid",
-  "hot_score": 82,
-  "business_score": 91,
-  "client_pain_score": 88,
-  "content_score": 79,
+  "topic_emotion": "IPO压力",
+  "china_boss_relevance_score": 94,
+  "enterprise_globalization_score": 88,
+  "overseas_capital_score": 91,
+  "wechat_channels_potential_score": 86,
+  "douyin_potential_score": 78,
+  "comment_controversy_score": 62,
+  "collection_value_score": 88,
+  "international_news_score": 38,
   "risk_score": 32,
-  "final_score": 75.95,
-  "business_fit_reason": "可切入中国企业海外融资和新加坡资本市场窗口期。",
-  "recommended_angle": "为什么企业出海融资不能只看估值，还要看资本结构。"
+  "final_score": 84.65,
+  "china_boss_fit_reason": "香港 IPO 和海外融资路径会直接影响准备上市企业的融资节奏。",
+  "capital_logic_reason": "资本市场窗口变化会倒逼企业提前设计股东结构、上市地和投资人故事。",
+  "recommended_angle": "最近香港 IPO 有个变化，老板真正要看的不是热度，而是上市路径。"
 }
 ```
 
@@ -766,13 +842,13 @@ POST /api/v1/topics/{topic_id}/request-revision
   "production_date": "2026-05-12",
   "count": 10,
   "categories": [
-    "ai",
+    "ai_capital",
     "ipo",
     "singapore_capital_market",
     "family_office",
     "enterprise_globalization"
   ],
-  "style": "finance_investment_banking_advisor",
+  "style": "china_boss_global_capital_advisor",
   "use_performance_learning": true
 }
 ```
