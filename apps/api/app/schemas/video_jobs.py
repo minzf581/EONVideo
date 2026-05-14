@@ -21,10 +21,12 @@ class VideoJobPayload(BaseModel):
     durationSeconds: int = Field(default=60, ge=15, le=180)
     fps: int = Field(default=30, ge=24, le=60)
     template: str = "CapitalNews"
-    style: str = "finance_advisory"
+    style: str = "douyin_finance_ip"
     targetPlatform: str = "douyin"
     coverTitle: str = ""
     scriptType: str = "60s"
+    voiceoverUrl: str | None = None
+    bgmUrl: str | None = None
 
 
 class VideoJobCreateRequest(BaseModel):

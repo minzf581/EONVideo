@@ -4,6 +4,9 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import type { RenderPayload } from "./db.js";
+import { buildBrollTimeline } from "./media/broll.js";
+import { buildSubtitleTimeline, financeKeywords } from "./media/subtitles.js";
+import { prepareVoiceover, resolveBgmUrl } from "./media/tts.js";
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 const entryPoint = path.join(dirname, "Root.js");
@@ -14,6 +17,9 @@ export async function renderJobVideo(jobId: string, payload: RenderPayload): Pro
   const outputPath = `/tmp/${jobId}.mp4`;
   const fps = payload.fps ?? 30;
   const durationSeconds = payload.durationSeconds ?? 60;
+  const voiceover = await prepareVoiceover(jobId, payload.script, payload.voiceoverUrl);
+  const brollScenes = await buildBrollTimeline(payload.script, durationSeconds);
+  const subtitleTimeline = buildSubtitleTimeline(payload.script, durationSeconds, financeKeywords);
   const inputProps = {
     title: payload.title,
     subtitle: payload.subtitle ?? "国际资本市场观察",
@@ -21,6 +27,12 @@ export async function renderJobVideo(jobId: string, payload: RenderPayload): Pro
     bullets: payload.bullets ?? [],
     brandName: payload.brandName ?? "EONVideo Capital Brief",
     cta: payload.cta ?? "关注账号，了解更多海外融资与新加坡资本市场观察。",
+    voiceoverUrl: voiceover?.url,
+    bgmUrl: resolveBgmUrl(payload.bgmUrl),
+    brollScenes,
+    subtitleTimeline,
+    keywords: financeKeywords,
+    visualStyle: payload.style ?? "douyin_finance_ip",
   };
 
   if (!bundled) {

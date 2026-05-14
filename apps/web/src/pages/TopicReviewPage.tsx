@@ -376,6 +376,8 @@ export function TopicReviewPage() {
                   <Field label="副标题" value={videoForm.subtitle} onChange={(value) => setVideoForm({ ...videoForm, subtitle: value })} />
                   <Field label="封面标题" value={videoForm.coverTitle} onChange={(value) => setVideoForm({ ...videoForm, coverTitle: value })} />
                   <Field label="品牌名" value={videoForm.brandName} onChange={(value) => setVideoForm({ ...videoForm, brandName: value })} />
+                  <Field label="自定义配音 MP3 URL（可选）" value={videoForm.voiceoverUrl ?? ""} onChange={(value) => setVideoForm({ ...videoForm, voiceoverUrl: value || null })} />
+                  <Field label="商务财经 BGM URL（可选）" value={videoForm.bgmUrl ?? ""} onChange={(value) => setVideoForm({ ...videoForm, bgmUrl: value || null })} />
                   <Field label="行动引导 CTA" value={videoForm.cta} onChange={(value) => setVideoForm({ ...videoForm, cta: value })} className="col-span-2" />
                   <Field
                     label="视频要点，逗号分隔"
@@ -544,10 +546,12 @@ function buildVideoPayload(topic: Topic, scriptType: ScriptType): VideoJobPayloa
     durationSeconds,
     fps: 30,
     template: "CapitalNews",
-    style: "finance_advisory",
+    style: "douyin_finance_ip",
     targetPlatform: "douyin",
     coverTitle: topic.cover_title,
     scriptType,
+    voiceoverUrl: null,
+    bgmUrl: null,
   };
 }
 

@@ -76,6 +76,8 @@ export interface VideoJobPayload {
   targetPlatform: string;
   coverTitle: string;
   scriptType: string;
+  voiceoverUrl?: string | null;
+  bgmUrl?: string | null;
 }
 
 export interface VideoJob {

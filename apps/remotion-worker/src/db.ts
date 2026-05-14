@@ -23,6 +23,12 @@ export interface RenderPayload {
   cta?: string;
   durationSeconds?: number;
   fps?: number;
+  voiceoverUrl?: string;
+  bgmUrl?: string;
+  style?: string;
+  targetPlatform?: string;
+  coverTitle?: string;
+  scriptType?: string;
 }
 
 const databaseUrl = process.env.DATABASE_URL;
@@ -123,4 +129,3 @@ export async function markJobFailed(jobId: string, error: unknown): Promise<void
 export async function closeDb(): Promise<void> {
   await pool.end();
 }
-

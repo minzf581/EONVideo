@@ -126,11 +126,26 @@ R2_PUBLIC_BASE_URL=
 WORKER_CONCURRENCY=1
 ```
 
+可选视频质量增强环境变量：
+
+```text
+OPENAI_API_KEY=              # 自动生成中文 AI 配音 MP3
+TTS_MODEL=gpt-4o-mini-tts
+TTS_VOICE=alloy
+PEXELS_API_KEY=              # 按关键词检索 Pexels Videos
+PIXABAY_API_KEY=             # Pexels 无结果时检索 Pixabay Videos
+BROLL_LIBRARY_JSON={}        # 手动配置 Mixkit/自有素材 URL，格式为 {"新加坡":"https://...mp4"}
+BGM_URL=                     # 轻商务财经风背景音乐 URL，会以低音量循环混入
+```
+
 Worker 行为：
 
 - 每 5 秒领取一条 `status='pending'` 的任务
 - 使用 `for update skip locked` 防止重复领取
-- 使用 Remotion 模板 `CapitalNews` 渲染 1080x1920 MP4
+- 使用 Remotion 模板 `CapitalNews` 渲染 1080x1920 MP4，自动生成字幕时间轴、B-roll 场景和动态镜头
+- 有 `OPENAI_API_KEY` 时自动生成中文财经口播 MP3；也可在任务里传入 `voiceoverUrl`
+- 有 `PEXELS_API_KEY` / `PIXABAY_API_KEY` / `BROLL_LIBRARY_JSON` 时按“新加坡、香港、IPO、企业出海、AI、RWA、家族办公室、企业融资、上市公司、工厂、港口、CBD、股票市场”等关键词匹配视频素材；无外部素材时使用生成式动态财经背景兜底
+- 有 `BGM_URL` 或任务级 `bgmUrl` 时自动混入轻商务财经 BGM，并降低音量避免盖过人声
 - 临时文件写入 `/tmp/{job_id}.mp4`
 - 上传到 Cloudflare R2
 - 成功后更新 `video_url` 和 `completed_at`
@@ -147,7 +162,10 @@ Worker 行为：
   "brandName": "EONVideo Capital Brief",
   "cta": "关注账号，了解更多海外融资观察。",
   "durationSeconds": 60,
-  "fps": 30
+  "fps": 30,
+  "voiceoverUrl": null,
+  "bgmUrl": null,
+  "style": "douyin_finance_ip"
 }
 ```
 

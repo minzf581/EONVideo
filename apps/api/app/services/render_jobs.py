@@ -57,6 +57,10 @@ def normalize_payload(raw_payload: dict[str, Any]) -> VideoJobPayload:
         payload["coverTitle"] = payload.pop("cover_title")
     if "script_type" in payload and "scriptType" not in payload:
         payload["scriptType"] = payload.pop("script_type")
+    if "voiceover_url" in payload and "voiceoverUrl" not in payload:
+        payload["voiceoverUrl"] = payload.pop("voiceover_url")
+    if "bgm_url" in payload and "bgmUrl" not in payload:
+        payload["bgmUrl"] = payload.pop("bgm_url")
     return VideoJobPayload.model_validate(payload)
 
 

@@ -49,14 +49,23 @@ def format_srt_time(total_seconds: int) -> str:
 def build_remotion_payload(topic: Topic, script: TopicScript, template: str) -> dict[str, object]:
     return {
         "template": template,
-        "composition": "FinanceAdvisoryVideo",
+        "composition": "CapitalNews",
         "resolution": "1080x1920",
         "topic_id": str(topic.id),
-        "title": topic.cover_title,
+        "title": topic.topic_title,
         "subtitle": topic.topic_title,
         "script_type": script.script_type,
-        "voiceover": script.full_script,
+        "script": script.full_script,
+        "voiceoverUrl": None,
+        "bgmUrl": None,
         "bullets": [topic.target_client, topic.user_pain_point, topic.business_entry_point],
+        "brandName": "EONVideo Capital Brief",
+        "cta": "关注账号，了解更多海外融资与新加坡资本市场观察。",
+        "durationSeconds": script.estimated_duration_seconds,
+        "fps": 30,
+        "style": "douyin_finance_ip",
+        "targetPlatform": "douyin",
+        "coverTitle": topic.cover_title,
         "riskNotice": topic.risk_notice,
     }
 
